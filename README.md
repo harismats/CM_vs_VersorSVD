@@ -52,7 +52,7 @@ The outputs include
 
 ### Experiment C
 
-Synthetic isotropic, planar and line-like clouds are generated with
+Synthetic isotropic, planar and line-like clouds are generated with anisotropy parameter
 
 ```text
 ε = 10^-1, 10^-2, 10^-3
