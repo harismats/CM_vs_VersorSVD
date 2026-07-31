@@ -1,64 +1,109 @@
-# Code for Paper "Absolute Orientation with Geometric Algebra: A Comparative Study of Characteristic Multivector and Versor-SVD Solvers"
+# Code for “Absolute Orientation with Geometric Algebra: A Comparative Study of Characteristic Multivector and Versor-SVD Solvers”
 
-This repository contains the MATLAB code used for the experiments in the paper:
+This repository contains the MATLAB code used for the experiments in the paper
 
 **Absolute Orientation with Geometric Algebra: A Comparative Study of Characteristic Multivector and Versor-SVD Solvers**
 
-The code compares two Geometric Algebra based solvers for the 3D Absolute Orientation problem:
+The script compares two Geometric Algebra based solvers for the 3D Absolute Orientation problem
 
-- **CM (Characteristic Multivector) method**
-- **Versor–SVD method**
+- **CM**, the Characteristic Multivector method
+- **Versor-SVD**, a numerical solver based on the versor equation and singular value decomposition
 
-Both methods estimate the rotation aligning two corresponding 3D point sets and are evaluated under a common experimental pipeline.
+Both methods estimate the rotation between corresponding centred 3D point sets.
 
-## Overview
+## Main script
 
-The main script runs three experiments:
+Run the supplied MATLAB `.m` file from the same directory as `dolphins.ply`.
 
-### Experiment A — Benchmark on a real point cloud
-A real 3D point cloud is transformed by 200 random rigid motions.  
-For each trial, the script estimates the rotation with both methods and records:
+The script creates
+
+```text
+output_AO_CM_vs_VSVD_combined
+```
+
+and saves all figures, raw `.mat` data, summary tables, trial-level `.csv` files, statistical results and convergence diagnostics in that folder.
+
+## Experiments
+
+### Experiment A
+
+A real dolphin point cloud is transformed by 200 random rigid motions. The script records
 
 - runtime
 - Frobenius rotation error
 - geodesic angle error
 - RMS point residual
 - determinant deviation
+- orthogonality defect
 
-### Experiment B — Noise robustness
-Gaussian noise is added to the transformed point cloud at several relative levels.  
-The script evaluates how both solvers behave as the noise level increases.
+It also produces paired runtime statistics and a cumulative trial-count analysis.
 
-### Experiment C — Geometric conditioning
-Synthetic isotropic, planar, and line-like point clouds are generated with controlled anisotropy.  
-The script studies the relation between rotation error and the condition number of the cross-covariance matrix.
+### Experiment B
+
+Gaussian noise is added at 0, 0.1, 0.5, 1.0, and 1.5 percent of the point cloud bounding-box diagonal. Each level uses 200 trials.
+
+The outputs include
+
+- angle error and RMS-residual plots
+- paired bootstrap confidence intervals
+- paired sign-flip randomisation tests
+- Holm adjusted p-values
+- trial count convergence results
+
+### Experiment C
+
+Synthetic isotropic, planar and line-like clouds are generated with
+
+```text
+ε = 10^-1, 10^-2, 10^-3
+```
+
+Each cloud contains 300 points and each configuration uses 100 trials. The script records rotation errors, `cond(H)`, rotational information diagnostics, Versor-SVD singular values, null-space information and convergence results.
 
 ## Requirements
 
-To run the full code, you will need:
-
-- **MATLAB** (R2016b or newer recommended)
-- a **3D point cloud file** named `dolphins.ply`
-- a **Clifford algebra toolbox** providing:
+- MATLAB R2019b or newer
+- Computer Vision Toolbox for `pcread`
+- Statistics and Machine Learning Toolbox for `boxplot`
+- `dolphins.ply`
+- a Clifford algebra toolbox providing
   - `clifford_signature`
   - `wedge`
   - `reverse`
   - `unit`
   - `coefficients`
-  - basis vectors such as `e1`, `e2`, `e3`
+  - `e1`, `e2`, and `e3`
 
-## Notes on dependencies
+The CM implementation requires the Clifford toolbox. The Versor-SVD implementation is numerical and does not use the toolbox internally. The complete script requires both components.
 
-- The **CM method** depends on the Clifford algebra toolbox.
-- The **Versor–SVD implementation** is purely numerical and does **not** require the Clifford toolbox by itself.
-- Since the main script compares both methods, the toolbox is required to run the full set of experiments.
+## Running the code
 
-## Input data
+1. Add the Clifford toolbox to the MATLAB path.
+2. Place the MATLAB script and `dolphins.ply` in the same folder.
+3. Set the three experiment switches at the top of the script as required.
+4. Run the script.
 
-Put `dolphins.ply` in the same directory as the script before running the code.
+All computations use double precision and fixed random seeds for reproducibility.
 
-The script loads the point cloud with:
+## Timing note
 
-```matlab
-ptCloud = pcread('dolphins.ply');
+The runtime values reproduce the timing convention used in the paper. CM timing covers the characteristic-multivector solver stage after covariance and reciprocal frame construction. Versor-SVD timing covers the complete `versorSVD_from_pairs_GA` call. The reported values should therefore be interpreted as implementation stage timings rather than equal boundary end-to-end pipeline timings.
 
+## Key outputs
+
+```text
+01_Accuracy_Boxplots.png
+02_Runtime_Box_and_Scatter.png
+B_Noise_Clouds_Overview.png
+B_Noise_Metrics_vs_Sigma.png
+B_Paired_Angle_Effects.png
+B_Trial_Count_Convergence.png
+C_Cond_Angle_vs_CondH.png
+C_Conditioning_Diagnostics.png
+A_runtime_paired_statistics.csv
+B_noise_paired_statistics.csv
+C_conditioning_summary.csv
+metrics_CM_vs_VSVD.mat
+B_noise_robustness.mat
+C_conditioning_synthetic.mat
+```
