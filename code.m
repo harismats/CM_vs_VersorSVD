@@ -1490,7 +1490,7 @@ function q = simplePercentile(x, p)
 
     x = sort(x(isfinite(x)));
     x = x(:);
-    p = p(:)';
+    p = p(:).';
     if isempty(x)
         q = nan(size(p));
         return;
